@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramanujan AR Wall - Interactive Mathematical Experience</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ffff;
+            --secondary: #ff00ff;
+            --accent: #ffff00;
+            --dark-bg: #0a0a15;
+            --darker-bg: #05050c;
+            --card-bg: rgba(20, 20, 40, 0.8);
+            --text: #f0f0f0;
+            --text-dim: #b0b0d0;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --glow-primary: 0 0 15px var(--primary), 0 0 30px rgba(0, 255, 255, 0.3);
+            --glow-secondary: 0 0 15px var(--secondary), 0 0 30px rgba(255, 0, 255, 0.3);
+            --glow-accent: 0 0 15px var(--accent), 0 0 30px rgba(255, 255, 0, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Animated particle background */
+        #particles-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Header */
+        header {
+            text-align: center;
+            padding: 20px 0 40px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: var(--glow-primary);
+            animation: titleGlow 3s infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: var(--glow-primary); }
+            100% { text-shadow: 0 0 25px var(--primary), 0 0 40px rgba(0, 255, 255, 0.5); }
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        
+        /* Scoreboard */
+        #scoreboard {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: var(--glow-primary);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            z-index: 100;
+            min-width: 200px;
+            transition: transform 0.3s ease;
+        }
+        
+        #scoreboard:hover {
+            transform: translateY(-5px);
+        }
+        
+        .score-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            text-shadow: var(--glow-accent);
+        }
+        
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 12px 24px;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-btn:hover {
+            background-color: rgba(0, 255, 255, 0.1);
+            box-shadow: var(--glow-primary);
+            transform: translateY(-3px);
+        }
+        
+        .control-btn.active {
+            background-color: rgba(0, 255, 255, 0.2);
+            box-shadow: var(--glow-primary);
+        }
+        
+        /* Main content grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        /* Cards/Posters */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid transparent;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .card:hover {
+            transform: translateY(-15px);
+            box-shadow: var(--glow-secondary);
+            border-color: var(--secondary);
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--text);
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card-description {
+            color: var(--text-dim);
+            line-height: 1.6;
+            font-size: 1.1rem;
+            flex-grow: 1;
+        }
+        
+        .card-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        /* Modal overlays */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 5, 12, 0.95);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--darker-bg);
+            max-width: 1000px;
+            margin: 40px auto;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--glow-primary);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            position: relative;
+            animation: modalAppear 0.5s ease;
+        }
+        
+        @keyframes modalAppear {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-modal:hover {
+            color: var(--secondary);
+            transform: rotate(90deg);
+            background-color: rgba(255, 0, 255, 0.1);
+        }
+        
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        /* Magic Square Grid */
+        .magic-square-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .magic-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .magic-cell {
+            width: 80px;
+            height: 80px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+        
+        .magic-cell.empty {
+            background-color: rgba(20, 20, 40, 0.5);
+            border-style: dashed;
+            color: var(--text-dim);
+        }
+        
+        .magic-cell:hover:not(.filled) {
+            background-color: rgba(0, 255, 255, 0.1);
+            box-shadow: var(--glow-primary);
+        }
+        
+        .magic-cell.filled {
+            background-color: rgba(0, 255, 255, 0.2);
+            animation: cellPop 0.5s ease;
+        }
+        
+        @keyframes cellPop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .magic-cell.correct {
+            background-color: rgba(0, 255, 136, 0.2);
+            border-color: var(--success);
+            box-shadow: 0 0 15px var(--success);
+        }
+        
+        .drag-numbers {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .drag-number {
+            width: 60px;
+            height: 60px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+            cursor: grab;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .drag-number:hover {
+            background-color: rgba(255, 0, 255, 0.1);
+            box-shadow: var(--glow-secondary);
+            transform: translateY(-5px);
+        }
+        
+        /* 1729 Cubes */
+        .cubes-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .cubes-display {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .cube {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
+        
+        .cube:hover {
+            transform: rotateY(20deg) rotateX(10deg);
+        }
+        
+        .cube-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--card-bg);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .front { transform: translateZ(50px); }
+        .back { transform: rotateY(180deg) translateZ(50px); }
+        .right { transform: rotateY(90deg) translateZ(50px); }
+        .left { transform: rotateY(-90deg) translateZ(50px); }
+        .top { transform: rotateX(90deg) translateZ(50px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50px); }
+        
+        .cube.combined {
+            animation: cubeCombine 1s ease;
+        }
+        
+        @keyframes cubeCombine {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Pi Series */
+        .pi-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .pi-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            color: var(--primary);
+            text-align: center;
+            line-height: 1.8;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 200px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .pi-digit {
+            display: inline-block;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .pi-digit:hover {
+            background-color: rgba(255, 0, 255, 0.2);
+            box-shadow: var(--glow-secondary);
+            transform: translateY(-5px);
+        }
+        
+        /* Handwritten Notes */
+        .notes-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .note-page {
+            width: 100%;
+            max-width: 600px;
+            background-color: #f5e9c9;
+            color: #333;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            position: relative;
+            min-height: 400px;
+        }
+        
+        .note-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to bottom, transparent 95%, rgba(0,0,0,0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .formula {
+            background-color: rgba(0, 150, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid #0066cc;
+        }
+        
+        .formula:hover {
+            background-color: rgba(0, 150, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 150, 255, 0.5);
+        }
+        
+        /* Game feedback */
+        .feedback {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px 25px;
+            box-shadow: var(--glow-primary);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            z-index: 100;
+            display: none;
+            animation: slideIn 0.5s ease;
+            max-width: 300px;
+        }
+        
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.success {
+            border-color: var(--success);
+            box-shadow: 0 0 15px var(--success);
+        }
+        
+        .feedback.error {
+            border-color: #ff4444;
+            box-shadow: 0 0 15px #ff4444;
+        }
+        
+        /* Easter eggs */
+        .easter-egg {
+            position: fixed;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--glow-accent);
+            border: 1px solid var(--accent);
+            max-width: 300px;
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 2.8rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                margin: 20px auto;
+            }
+            
+            #scoreboard {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 0 auto 30px;
+                width: 200px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .magic-cell {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .cube {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .cube-face {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <canvas id="particles-background"></canvas>
+    
+    <!-- Scoreboard -->
+    <div id="scoreboard">
+        <div class="score-title">Knowledge Points</div>
+        <div id="score">0</div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1>Ramanujan AR Wall</h1>
+            <div class="subtitle">Interactive Exploration of Mathematical Genius</div>
+            
+            <!-- Control buttons -->
+            <div class="controls">
+                <button id="voiceToggle" class="control-btn">
+                    <i class="fas fa-volume-up"></i> Toggle Voice Narration
+                </button>
+                <button id="musicToggle" class="control-btn">
+                    <i class="fas fa-music"></i> Background Music
+                </button>
+                <button id="resetBtn" class="control-btn">
+                    <i class="fas fa-redo"></i> Reset Activities
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main content grid -->
+        <div class="content-grid">
+            <!-- Magic Square Card -->
+            <div class="card" id="magicSquareCard">
+                <div class="card-icon">
+                    <i class="fas fa-th-large"></i>
+                </div>
+                <div class="card-title">Magic Square</div>
+                <div class="card-description">
+                    Explore Ramanujan's mystical 4x4 magic square where rows, columns, and diagonals sum to the same number. Discover the mathematical beauty behind this arrangement.
+                </div>
+                <div class="card-footer">Click to Explore →</div>
+            </div>
+            
+            <!-- 1729 Cubes Card -->
+            <div class="card" id="cubesCard">
+                <div class="card-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div class="card-title">1729 - Taxicab Number</div>
+                <div class="card-description">
+                    Discover the story of 1729, the smallest number expressible as the sum of two cubes in two different ways. Interact with 3D cubes to visualize this unique property.
+                </div>
+                <div class="card-footer">Click to Explore →</div>
+            </div>
+            
+            <!-- Infinite Series Card -->
+            <div class="card" id="piSeriesCard">
+                <div class="card-icon">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <div class="card-title">Infinite Series</div>
+                <div class="card-description">
+                    Dive into Ramanujan's groundbreaking infinite series for π (pi). Watch digits cascade in a matrix-style animation and explore the beauty of infinite convergence.
+                </div>
+                <div class="card-footer">Click to Explore →</div>
+            </div>
+            
+            <!-- Handwritten Notes Card -->
+            <div class="card" id="notesCard">
+                <div class="card-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="card-title">Handwritten Notes</div>
+                <div class="card-description">
+                    Examine digital replicas of Ramanujan's original handwritten formulas. Hover to highlight equations and click for audio explanations of his revolutionary work.
+                </div>
+                <div class="card-footer">Click to Explore →</div>
+            </div>
+        </div>
+        
+        <!-- Feedback message -->
+        <div id="feedback" class="feedback">
+            <div id="feedbackText">Test feedback message</div>
+        </div>
+        
+        <!-- Easter egg container -->
+        <div id="easterEggContainer"></div>
+        
+        <footer>
+            <p>Ramanujan AR Wall - An Interactive Educational Experience</p>
+            <p>© 2023 | Celebrating the Legacy of Srinivasa Ramanujan</p>
+        </footer>
+    </div>
+    
+    <!-- Modal for Magic Square -->
+    <div id="magicSquareModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" id="closeMagicSquare">&times;</div>
+            <h2 class="modal-title">Magic Square Explorer</h2>
+            <div class="magic-square-container">
+                <p>Fill the 4x4 grid so that each row, column, and diagonal sums to 139. Drag and drop numbers from the pool below.</p>
+                
+                <div class="magic-grid" id="magicGrid">
+                    <!-- Magic square cells will be generated by JS -->
+                </div>
+                
+                <div class="drag-numbers" id="dragNumbers">
+                    <!-- Draggable numbers will be generated by JS -->
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button id="checkMagicSquare" class="control-btn">
+                        <i class="fas fa-check-circle"></i> Check Solution
+                    </button>
+                    <button id="revealMagicSquare" class="control-btn">
+                        <i class="fas fa-eye"></i> Reveal Solution
+                    </button>
+                    <button id="resetMagicSquare" class="control-btn">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for 1729 Cubes -->
+    <div id="cubesModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" id="closeCubes">&times;</div>
+            <h2 class="modal-title">1729 - The Taxicab Number</h2>
+            <div class="cubes-container">
+                <p>1729 is the smallest number that can be expressed as the sum of two cubes in two different ways:</p>
+                <p style="text-align: center; font-size: 1.5rem; color: var(--accent); margin: 15px 0;">
+                    1729 = 1³ + 12³ = 9³ + 10³
+                </p>
+                
+                <div class="cubes-display" id="cubesDisplay">
+                    <!-- 3D cubes will be generated by JS -->
+                </div>
+                
+                <div style="text-align: center;">
+                    <p>Click on cubes to reveal their values. Try to combine cubes to make 1729!</p>
+                    <button id="combineCubes" class="control-btn">
+                        <i class="fas fa-cube"></i> Combine Cubes
+                    </button>
+                    <button id="resetCubes" class="control-btn">
+                        <i class="fas fa-redo"></i> Reset Cubes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Pi Series -->
+    <div id="piModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" id="closePi">&times;</div>
+            <h2 class="modal-title">Infinite Series for π</h2>
+            <div class="pi-container">
+                <p>Ramanujan discovered several remarkable series for calculating π. Hover over digits to learn more:</p>
+                
+                <div class="pi-display" id="piDisplay">
+                    <!-- Pi digits will be generated by JS -->
+                </div>
+                
+                <div>
+                    <button id="startPiAnimation" class="control-btn">
+                        <i class="fas fa-play"></i> Animate π Series
+                    </button>
+                    <button id="stopPiAnimation" class="control-btn">
+                        <i class="fas fa-stop"></i> Stop Animation
+                    </button>
+                </div>
+                
+                <div style="margin-top: 20px; max-width: 800px;">
+                    <p style="color: var(--text-dim); font-style: italic;">
+                        "Ramanujan's series for 1/π converges extraordinarily rapidly and forms the basis of some of the fastest algorithms used to calculate π."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Handwritten Notes -->
+    <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" id="closeNotes">&times;</div>
+            <h2 class="modal-title">Ramanujan's Handwritten Notes</h2>
+            <div class="notes-container">
+                <p>Explore Ramanujan's famous formulas. Click on any formula to hear an explanation:</p>
+                
+                <div class="note-page" id="notePage">
+                    <h3 style="color: #333; margin-bottom: 20px; text-align: center;">Ramanujan's Notebooks</h3>
+                    
+                    <div class="formula" data-formula="partition">
+                        p(n) = (1/(π√2))∑_{k=1}^∞ A_k(n)√k d/dn[sinh(π√(2/3)(√(n-1/24))/k)/(√(n-1/24))]
+                    </div>
+                    
+                    <p>This is the Hardy-Ramanujan asymptotic formula for the partition function p(n).</p>
+                    
+                    <div class="formula" data-formula="pi">
+                        1/π = (2√2)/(99^2) ∑_{k=0}^∞ (26390k+1103)/(396^{4k}) (4k)!/(k!)^4
+                    </div>
+                    
+                    <p>One of Ramanujan's series for 1/π that converges remarkably quickly.</p>
+                    
+                    <div class="formula" data-formula="mocktheta">
+                        f(q) = 1 + q/(1+q) + q^4/((1+q)(1+q^2)) + q^9/((1+q)(1+q^2)(1+q^3)) + ...
+                    </div>
+                    
+                    <p>A mock theta function, one of Ramanujan's last discoveries.</p>
+                    
+                    <div class="formula" data-formula="taxicab">
+                        1729 = 1^3 + 12^3 = 9^3 + 10^3
+                    </div>
+                    
+                    <p>The famous taxicab number from the conversation with G.H. Hardy.</p>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button id="nextNote" class="control-btn">
+                            <i class="fas fa-arrow-right"></i> Next Page
+                        </button>
+                        <button id="readAllFormulas" class="control-btn">
+                            <i class="fas fa-volume-up"></i> Read All Formulas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // App state
+            const state = {
+                score: 0,
+                voiceEnabled: true,
+                musicEnabled: false,
+                currentModal: null,
+                piAnimationInterval: null,
+                magicSquareSolution: [
+                    [22, 12, 18, 87],
+                    [88, 17, 9, 25],
+                    [10, 24, 89, 16],
+                    [19, 86, 23, 11]
+                ],
+                currentMagicSquare: Array(4).fill().map(() => Array(4).fill(null)),
+                cubes: [
+                    { value: 1, isCube: true },
+                    { value: 12, isCube: true },
+                    { value: 9, isCube: true },
+                    { value: 10, isCube: true },
+                    { value: 1729, isCube: false }
+                ],
+                currentNotePage: 1,
+                easterEggsShown: []
+            };
+            
+            // DOM Elements
+            const scoreElement = document.getElementById('score');
+            const scoreboard = document.getElementById('scoreboard');
+            const feedback = document.getElementById('feedback');
+            const feedbackText = document.getElementById('feedbackText');
+            const easterEggContainer = document.getElementById('easterEggContainer');
+            
+            // Control buttons
+            const voiceToggleBtn = document.getElementById('voiceToggle');
+            const musicToggleBtn = document.getElementById('musicToggle');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Card elements
+            const magicSquareCard = document.getElementById('magicSquareCard');
+            const cubesCard = document.getElementById('cubesCard');
+            const piSeriesCard = document.getElementById('piSeriesCard');
+            const notesCard = document.getElementById('notesCard');
+            
+            // Modal elements
+            const magicSquareModal = document.getElementById('magicSquareModal');
+            const cubesModal = document.getElementById('cubesModal');
+            const piModal = document.getElementById('piModal');
+            const notesModal = document.getElementById('notesModal');
+            
+            // Close modal buttons
+            const closeMagicSquare = document.getElementById('closeMagicSquare');
+            const closeCubes = document.getElementById('closeCubes');
+            const closePi = document.getElementById('closePi');
+            const closeNotes = document.getElementById('closeNotes');
+            
+            // Initialize particle background
+            initParticleBackground();
+            
+            // Initialize interactive features
+            initMagicSquare();
+            initCubes();
+            initPiSeries();
+            initNotes();
+            initEasterEggs();
+            
+            // Event listeners for cards
+            magicSquareCard.addEventListener('click', () => openModal('magicSquare'));
+            cubesCard.addEventListener('click', () => openModal('cubes'));
+            piSeriesCard.addEventListener('click', () => openModal('pi'));
+            notesCard.addEventListener('click', () => openModal('notes'));
+            
+            // Event listeners for control buttons
+            voiceToggleBtn.addEventListener('click', toggleVoice);
+            musicToggleBtn.addEventListener('click', toggleMusic);
+            resetBtn.addEventListener('click', resetAll);
+            
+            // Event listeners for close modal buttons
+            closeMagicSquare.addEventListener('click', () => closeModal('magicSquare'));
+            closeCubes.addEventListener('click', () => closeModal('cubes'));
+            closePi.addEventListener('click', () => closeModal('pi'));
+            closeNotes.addEventListener('click', () => closeModal('notes'));
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                if (state.currentModal && event.target.classList.contains('modal')) {
+                    closeModal(state.currentModal);
+                }
+            });
+            
+            // Functions
+            function openModal(modalName) {
+                // Close any open modal first
+                if (state.currentModal) {
+                    closeModal(state.currentModal);
+                }
+                
+                // Set current modal
+                state.currentModal = modalName;
+                
+                // Show the requested modal
+                let modalElement;
+                switch(modalName) {
+                    case 'magicSquare':
+                        modalElement = magicSquareModal;
+                        speakText("Welcome to the Magic Square explorer. Fill the 4x4 grid so that each row, column, and diagonal sums to 139.");
+                        break;
+                    case 'cubes':
+                        modalElement = cubesModal;
+                        speakText("Welcome to 1729, the taxicab number. Explore how 1729 can be expressed as the sum of two cubes in two different ways.");
+                        break;
+                    case 'pi':
+                        modalElement = piModal;
+                        speakText("Welcome to Ramanujan's infinite series for pi. Watch as digits of pi cascade in a beautiful animation.");
+                        break;
+                    case 'notes':
+                        modalElement = notesModal;
+                        speakText("Welcome to Ramanujan's handwritten notes. Explore his revolutionary formulas and click on any to hear an explanation.");
+                        break;
+                }
+                
+                if (modalElement) {
+                    modalElement.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Add points for exploring
+                    addPoints(5, `Exploring ${getModalTitle(modalName)}`);
+                }
+            }
+            
+            function closeModal(modalName) {
+                let modalElement;
+                switch(modalName) {
+                    case 'magicSquare':
+                        modalElement = magicSquareModal;
+                        stopPiAnimation(); // Stop any running animation
+                        break;
+                    case 'cubes':
+                        modalElement = cubesModal;
+                        break;
+                    case 'pi':
+                        modalElement = piModal;
+                        stopPiAnimation();
+                        break;
+                    case 'notes':
+                        modalElement = notesModal;
+                        break;
+                }
+                
+                if (modalElement) {
+                    modalElement.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    state.currentModal = null;
+                }
+            }
+            
+            function getModalTitle(modalName) {
+                switch(modalName) {
+                    case 'magicSquare': return "Magic Square";
+                    case 'cubes': return "1729 Cubes";
+                    case 'pi': return "Pi Series";
+                    case 'notes': return "Handwritten Notes";
+                    default: return "";
+                }
+            }
+            
+            function toggleVoice() {
+                state.voiceEnabled = !state.voiceEnabled;
+                voiceToggleBtn.classList.toggle('active', state.voiceEnabled);
+                voiceToggleBtn.innerHTML = state.voiceEnabled ? 
+                    '<i class="fas fa-volume-up"></i> Voice Narration ON' : 
+                    '<i class="fas fa-volume-mute"></i> Voice Narration OFF';
+                
+                showFeedback(state.voiceEnabled ? 
+                    "Voice narration enabled" : 
+                    "Voice narration disabled", "success");
+            }
+            
+            function toggleMusic() {
+                state.musicEnabled = !state.musicEnabled;
+                musicToggleBtn.classList.toggle('active', state.musicEnabled);
+                musicToggleBtn.innerHTML = state.musicEnabled ? 
+                    '<i class="fas fa-music"></i> Music ON' : 
+                    '<i class="fas fa-music"></i> Music OFF';
+                
+                showFeedback(state.musicEnabled ? 
+                    "Ambient music enabled" : 
+                    "Ambient music disabled", "success");
+            }
+            
+            function resetAll() {
+                // Reset score
+                state.score = 0;
+                updateScore();
+                
+                // Reset magic square
+                resetMagicSquare();
+                
+                // Reset cubes
+                resetCubes();
+                
+                // Reset pi animation
+                stopPiAnimation();
+                
+                // Reset notes
+                state.currentNotePage = 1;
+                
+                // Show feedback
+                showFeedback("All activities have been reset", "success");
+                speakText("All activities have been reset. Your score is now zero.");
+                
+                // Trigger confetti effect
+                createConfetti();
+            }
+            
+            function addPoints(points, reason) {
+                state.score += points;
+                updateScore();
+                
+                // Show feedback for significant point gains
+                if (points >= 10) {
+                    showFeedback(`+${points} points: ${reason}`, "success");
+                    
+                    // Easter egg for reaching certain scores
+                    if (state.score >= 50 && state.score < 55 && !state.easterEggsShown.includes('score50')) {
+                        showEasterEgg("Did you know? Ramanujan discovered over 3,900 mathematical results during his short life!", 3000);
+                        state.easterEggsShown.push('score50');
+                    }
+                    
+                    if (state.score >= 100 && state.score < 105 && !state.easterEggsShown.includes('score100')) {
+                        showEasterEgg("Euler's number e raised to the power of π√163 is almost an integer - a result connected to Ramanujan's work!", 3000);
+                        state.easterEggsShown.push('score100');
+                    }
+                }
+            }
+            
+            function updateScore() {
+                scoreElement.textContent = state.score;
+                
+                // Animate score increase
+                scoreboard.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    scoreboard.style.transform = 'scale(1)';
+                }, 300);
+            }
+            
+            function showFeedback(message, type = "info") {
+                feedbackText.textContent = message;
+                feedback.className = `feedback show ${type}`;
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+            
+            function speakText(text) {
+    if (!state.voiceEnabled) return;
+    
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+    
+    // Use browser's text-to-speech API
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9; // Slower is more natural (0.8-1.2 range)
+        utterance.pitch = 1.0; // Keep normal pitch
+        utterance.volume = 1.0;
+        
+        // Get voices and select the best available
+        const voices = speechSynthesis.getVoices();
+        
+        if (voices.length > 0) {
+            // Try to find high-quality voices in order of preference
+            const voicePriority = [
+                // Google UK English Female (usually good quality in Chrome)
+                voice => voice.name.includes('Google UK English Female'),
+                // Microsoft UK English voices
+                voice => voice.name.includes('Microsoft Zira'),
+                // Natural-sounding voices
+                voice => voice.name.includes('Natural') || voice.name.includes('Premium'),
+                // Female voices (often sound better for narration)
+                voice => voice.name.includes('Female'),
+                // UK English voices
+                voice => voice.lang.startsWith('en-GB'),
+                // US English voices
+                voice => voice.lang.startsWith('en-US'),
+                // Any English voice
+                voice => voice.lang.startsWith('en')
+            ];
+            
+            let selectedVoice = null;
+            
+            // Try each priority level
+            for (const priority of voicePriority) {
+                selectedVoice = voices.find(priority);
+                if (selectedVoice) break;
+            }
+            
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+                console.log('Using voice:', selectedVoice.name);
+            }
+        }
+        
+        // Add natural pauses for better rhythm
+        utterance.onboundary = function(event) {
+            // You can add custom pause logic here if needed
+        };
+        
+        speechSynthesis.speak(utterance);
+    }
+}
+
+// Ensure voices are loaded before speaking
+function loadVoices() {
+    return new Promise((resolve) => {
+        let voices = speechSynthesis.getVoices();
+        if (voices.length) {
+            resolve(voices);
+        } else {
+            speechSynthesis.onvoiceschanged = () => {
+                voices = speechSynthesis.getVoices();
+                resolve(voices);
+            };
+        }
+    });
+}
+
+// Call this on initialization
+loadVoices().then(() => {
+    console.log('Voices loaded');
+});
+            
+            function initParticleBackground() {
+                const canvas = document.getElementById('particles-background');
+                const ctx = canvas.getContext('2d');
+                
+                // Set canvas size
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                // Particle system
+                const particles = [];
+                const particleCount = 100;
+                
+                // Create particles
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        size: Math.random() * 2 + 0.5,
+                        speedX: (Math.random() - 0.5) * 0.5,
+                        speedY: (Math.random() - 0.5) * 0.5,
+                        color: `rgba(${Math.floor(Math.random() * 100 + 155)}, ${Math.floor(Math.random() * 100 + 155)}, 255, ${Math.random() * 0.5 + 0.1})`
+                    });
+                }
+                
+                // Animation loop
+                function animateParticles() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Update and draw particles
+                    particles.forEach(particle => {
+                        // Update position
+                        particle.x += particle.speedX;
+                        particle.y += particle.speedY;
+                        
+                        // Wrap around edges
+                        if (particle.x < 0) particle.x = canvas.width;
+                        if (particle.x > canvas.width) particle.x = 0;
+                        if (particle.y < 0) particle.y = canvas.height;
+                        if (particle.y > canvas.height) particle.y = 0;
+                        
+                        // Draw particle
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fillStyle = particle.color;
+                        ctx.fill();
+                        
+                        // Draw connections between nearby particles
+                        particles.forEach(otherParticle => {
+                            const dx = particle.x - otherParticle.x;
+                            const dy = particle.y - otherParticle.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < 100) {
+                                ctx.beginPath();
+                                ctx.strokeStyle = `rgba(100, 150, 255, ${0.1 * (1 - distance/100)})`;
+                                ctx.lineWidth = 0.5;
+                                ctx.moveTo(particle.x, particle.y);
+                                ctx.lineTo(otherParticle.x, otherParticle.y);
+                                ctx.stroke();
+                            }
+                        });
+                    });
+                    
+                    requestAnimationFrame(animateParticles);
+                }
+                
+                animateParticles();
+            }
+            
+            function initMagicSquare() {
+                const magicGrid = document.getElementById('magicGrid');
+                const dragNumbers = document.getElementById('dragNumbers');
+                const checkMagicSquareBtn = document.getElementById('checkMagicSquare');
+                const revealMagicSquareBtn = document.getElementById('revealMagicSquare');
+                const resetMagicSquareBtn = document.getElementById('resetMagicSquare');
+                
+                // Generate magic square grid
+                for (let row = 0; row < 4; row++) {
+                    for (let col = 0; col < 4; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'magic-cell empty';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        cell.textContent = '';
+                        
+                        // Make cells droppable
+                        cell.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                        });
+                        
+                        cell.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            const number = e.dataTransfer.getData('text/plain');
+                            if (number) {
+                                fillCell(cell, number);
+                            }
+                        });
+                        
+                        // Allow clicking to fill if there's a number in the drag pool
+                        cell.addEventListener('click', () => {
+                            // Check if there's a selected number in the drag pool
+                            const selectedNumber = document.querySelector('.drag-number.selected');
+                            if (selectedNumber) {
+                                fillCell(cell, selectedNumber.textContent);
+                                selectedNumber.classList.remove('selected');
+                            }
+                        });
+                        
+                        magicGrid.appendChild(cell);
+                    }
+                }
+                
+                // Generate draggable numbers
+                const numbers = [22, 12, 18, 87, 88, 17, 9, 25, 10, 24, 89, 16, 19, 86, 23, 11];
+                
+                // Shuffle numbers for the game
+                const shuffledNumbers = [...numbers].sort(() => Math.random() - 0.5);
+                
+                shuffledNumbers.forEach(number => {
+                    const numberElement = document.createElement('div');
+                    numberElement.className = 'drag-number';
+                    numberElement.textContent = number;
+                    numberElement.draggable = true;
+                    
+                    // Make numbers draggable
+                    numberElement.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', number);
+                        numberElement.classList.add('selected');
+                    });
+                    
+                    numberElement.addEventListener('dragend', () => {
+                        numberElement.classList.remove('selected');
+                    });
+                    
+                    // Allow clicking to select
+                    numberElement.addEventListener('click', () => {
+                        // Deselect all other numbers
+                        document.querySelectorAll('.drag-number').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                        numberElement.classList.add('selected');
+                    });
+                    
+                    dragNumbers.appendChild(numberElement);
+                });
+                
+                // Initialize current magic square state
+                for (let i = 0; i < 4; i++) {
+                    state.currentMagicSquare[i] = [null, null, null, null];
+                }
+                
+                // Check solution button
+                checkMagicSquareBtn.addEventListener('click', checkMagicSquareSolution);
+                
+                // Reveal solution button
+                revealMagicSquareBtn.addEventListener('click', revealMagicSquareSolution);
+                
+                // Reset button
+                resetMagicSquareBtn.addEventListener('click', resetMagicSquare);
+            }
+            
+            function fillCell(cell, number) {
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                // Update state
+                state.currentMagicSquare[row][col] = parseInt(number);
+                
+                // Update UI
+                cell.textContent = number;
+                cell.classList.remove('empty');
+                cell.classList.add('filled');
+                
+                // Animate
+                cell.style.transform = 'scale(0)';
+                setTimeout(() => {
+                    cell.style.transform = 'scale(1)';
+                }, 10);
+                
+                // Remove the number from the drag pool if it's there
+                const numberElement = Array.from(document.querySelectorAll('.drag-number')).find(el => el.textContent === number);
+                if (numberElement) {
+                    numberElement.style.visibility = 'hidden';
+                }
+                
+                // Add points
+                addPoints(2, "Placing number in magic square");
+            }
+            
+            function checkMagicSquareSolution() {
+                const solution = state.magicSquareSolution;
+                let isCorrect = true;
+                let correctCells = 0;
+                
+                // Check each cell
+                for (let row = 0; row < 4; row++) {
+                    for (let col = 0; col < 4; col++) {
+                        const cellValue = state.currentMagicSquare[row][col];
+                        const cell = document.querySelector(`.magic-cell[data-row="${row}"][data-col="${col}"]`);
+                        
+                        if (cellValue === solution[row][col]) {
+                            cell.classList.add('correct');
+                            correctCells++;
+                        } else {
+                            cell.classList.remove('correct');
+                            isCorrect = false;
+                        }
+                    }
+                }
+                
+                if (isCorrect) {
+                    showFeedback("Perfect! You solved the magic square! All rows, columns, and diagonals sum to 139.", "success");
+                    speakText("Excellent! You've correctly solved Ramanujan's magic square. All rows, columns, and diagonals sum to 139.");
+                    addPoints(25, "Solving magic square");
+                    createConfetti();
+                    
+                    // Easter egg
+                    if (!state.easterEggsShown.includes('magicSquareSolved')) {
+                        showEasterEgg("Ramanujan's magic square has many mystical properties. The sum 139 is a prime number!", 4000);
+                        state.easterEggsShown.push('magicSquareSolved');
+                    }
+                } else {
+                    showFeedback(`You have ${correctCells}/16 correct. Keep trying!`, "error");
+                    speakText(`You have ${correctCells} out of 16 cells correct. Keep trying to solve the magic square.`);
+                }
+            }
+            
+            function revealMagicSquareSolution() {
+                const solution = state.magicSquareSolution;
+                
+                // Clear all cells first
+                document.querySelectorAll('.magic-cell').forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('filled', 'correct');
+                    cell.classList.add('empty');
+                });
+                
+                // Reset state
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        state.currentMagicSquare[i][j] = null;
+                    }
+                }
+                
+                // Show solution with animation
+                let delay = 0;
+                for (let row = 0; row < 4; row++) {
+                    for (let col = 0; col < 4; col++) {
+                        setTimeout(() => {
+                            const cell = document.querySelector(`.magic-cell[data-row="${row}"][data-col="${col}"]`);
+                            fillCell(cell, solution[row][col]);
+                            
+                            // Make it correct
+                            cell.classList.add('correct');
+                            
+                            // Add to state
+                            state.currentMagicSquare[row][col] = solution[row][col];
+                        }, delay);
+                        
+                        delay += 100;
+                    }
+                }
+                
+                // Hide all drag numbers
+                document.querySelectorAll('.drag-number').forEach(el => {
+                    el.style.visibility = 'hidden';
+                });
+                
+                // Show feedback
+                setTimeout(() => {
+                    showFeedback("Magic square solution revealed. All rows, columns, and diagonals sum to 139.", "success");
+                    speakText("Here is the solution to Ramanujan's magic square. Notice how all rows, columns, and diagonals sum to 139.");
+                }, delay + 200);
+            }
+            
+            function resetMagicSquare() {
+                // Clear all cells
+                document.querySelectorAll('.magic-cell').forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('filled', 'correct');
+                    cell.classList.add('empty');
+                });
+                
+                // Reset state
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        state.currentMagicSquare[i][j] = null;
+                    }
+                }
+                
+                // Show all drag numbers again
+                document.querySelectorAll('.drag-number').forEach(el => {
+                    el.style.visibility = 'visible';
+                });
+                
+                // Deselect any selected number
+                document.querySelectorAll('.drag-number').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                showFeedback("Magic square has been reset", "success");
+            }
+            
+            function initCubes() {
+                const cubesDisplay = document.getElementById('cubesDisplay');
+                const combineCubesBtn = document.getElementById('combineCubes');
+                const resetCubesBtn = document.getElementById('resetCubes');
+                
+                // Create cubes
+                state.cubes.forEach((cube, index) => {
+                    const cubeElement = document.createElement('div');
+                    cubeElement.className = 'cube';
+                    cubeElement.dataset.index = index;
+                    cubeElement.dataset.value = cube.value;
+                    cubeElement.dataset.isCube = cube.isCube;
+                    
+                    // Create cube faces
+                    for (let i = 0; i < 6; i++) {
+                        const face = document.createElement('div');
+                        face.className = 'cube-face';
+                        
+                        // Different face classes
+                        const faceClasses = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+                        face.classList.add(faceClasses[i]);
+                        
+                        // Show value on front face
+                        if (i === 0) {
+                            face.textContent = cube.isCube ? `${cube.value}³` : cube.value;
+                        } else if (i === 1) {
+                            // Back face shows the actual value
+                            face.textContent = cube.isCube ? Math.pow(cube.value, 3) : cube.value;
+                        } else {
+                            // Other faces show mathematical symbols
+                            face.innerHTML = '<i class="fas fa-cube"></i>';
+                        }
+                        
+                        cubeElement.appendChild(face);
+                    }
+                    
+                    // Add click event to reveal value
+                    cubeElement.addEventListener('click', function() {
+                        const value = this.dataset.value;
+                        const isCube = this.dataset.isCube === 'true';
+                        
+                        if (isCube) {
+                            const cubeValue = Math.pow(parseInt(value), 3);
+                            showFeedback(`${value}³ = ${cubeValue}`, "success");
+                            speakText(`${value} cubed equals ${cubeValue}`);
+                            addPoints(3, `Revealing ${value}³`);
+                            
+                            // Easter egg for clicking cube 1729
+                            if (parseInt(value) === 1729 && !state.easterEggsShown.includes('click1729')) {
+                                showEasterEgg("1729 is known as the Hardy-Ramanujan number after an anecdote about a taxi with this number.", 4000);
+                                state.easterEggsShown.push('click1729');
+                            }
+                        } else {
+                            showFeedback(`The target sum is ${value}`, "success");
+                            speakText(`The target sum is ${value}`);
+                        }
+                        
+                        // Rotate cube on click
+                        this.style.transform = 'rotateY(180deg) rotateX(20deg)';
+                        setTimeout(() => {
+                            this.style.transform = 'rotateY(0) rotateX(0)';
+                        }, 1000);
+                    });
+                    
+                    cubesDisplay.appendChild(cubeElement);
+                });
+                
+                // Combine cubes button
+                combineCubesBtn.addEventListener('click', combineCubes);
+                
+                // Reset cubes button
+                resetCubesBtn.addEventListener('click', resetCubes);
+            }
+            
+            function combineCubes() {
+                const cubes = document.querySelectorAll('.cube');
+                let combined = false;
+                
+                // Check for 1³ + 12³
+                const cube1 = Array.from(cubes).find(c => c.dataset.value === '1');
+                const cube12 = Array.from(cubes).find(c => c.dataset.value === '12');
+                
+                if (cube1 && cube12) {
+                    // Animate combination
+                    cube1.classList.add('combined');
+                    cube12.classList.add('combined');
+                    
+                    // Show result
+                    setTimeout(() => {
+                        showFeedback("1³ + 12³ = 1 + 1728 = 1729", "success");
+                        speakText("1 cubed plus 12 cubed equals 1 plus 1728, which equals 1729");
+                        addPoints(15, "Combining 1³ and 12³");
+                        combined = true;
+                    }, 500);
+                }
+                
+                // Check for 9³ + 10³
+                const cube9 = Array.from(cubes).find(c => c.dataset.value === '9');
+                const cube10 = Array.from(cubes).find(c => c.dataset.value === '10');
+                
+                if (cube9 && cube10 && !combined) {
+                    // Animate combination
+                    cube9.classList.add('combined');
+                    cube10.classList.add('combined');
+                    
+                    // Show result
+                    setTimeout(() => {
+                        showFeedback("9³ + 10³ = 729 + 1000 = 1729", "success");
+                        speakText("9 cubed plus 10 cubed equals 729 plus 1000, which equals 1729");
+                        addPoints(15, "Combining 9³ and 10³");
+                        combined = true;
+                    }, 500);
+                }
+                
+                if (!combined) {
+                    showFeedback("Select two cubes to combine. Try 1 and 12, or 9 and 10.", "error");
+                } else {
+                    // Trigger confetti for successful combination
+                    createConfetti();
+                }
+            }
+            
+            function resetCubes() {
+                // Remove combined class from all cubes
+                document.querySelectorAll('.cube').forEach(cube => {
+                    cube.classList.remove('combined');
+                });
+                
+                showFeedback("Cubes have been reset", "success");
+            }
+            
+            function initPiSeries() {
+                const piDisplay = document.getElementById('piDisplay');
+                const startPiAnimationBtn = document.getElementById('startPiAnimation');
+                const stopPiAnimationBtn = document.getElementById('stopPiAnimation');
+                
+                // Pi digits (first 100 digits)
+                const piDigits = "3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679";
+                
+                // Create digit elements
+                for (let i = 0; i < piDigits.length; i++) {
+                    const digit = document.createElement('span');
+                    digit.className = 'pi-digit';
+                    digit.textContent = piDigits[i];
+                    digit.dataset.position = i;
+                    
+                    // Add hover tooltip
+                    digit.addEventListener('mouseenter', function() {
+                        const pos = this.dataset.position;
+                        
+                        // Different explanations based on position
+                        let explanation = `Digit ${pos} of π`;
+                        if (pos == 0) explanation = "The integer part of π";
+                        if (piDigits[pos] === '.') explanation = "Decimal point";
+                        if (pos > 0 && piDigits[pos] !== '.') {
+                            explanation = `Digit ${pos-1} after decimal: ${piDigits[pos]}`;
+                        }
+                        
+                        // Show tooltip
+                        showFeedback(explanation, "success");
+                        
+                        // Easter egg for certain digits
+                        if (pos == 32 && !state.easterEggsShown.includes('pi32')) {
+                            showEasterEgg("Ramanujan discovered series that could compute π to millions of digits!", 3000);
+                            state.easterEggsShown.push('pi32');
+                        }
+                    });
+                    
+                    // Add click event
+                    digit.addEventListener('click', function() {
+                        const digitValue = this.textContent;
+                        speakText(`Digit ${digitValue} of pi`);
+                        addPoints(1, "Clicking π digit");
+                    });
+                    
+                    piDisplay.appendChild(digit);
+                }
+                
+                // Start animation button
+                startPiAnimationBtn.addEventListener('click', startPiAnimation);
+                
+                // Stop animation button
+                stopPiAnimationBtn.addEventListener('click', stopPiAnimation);
+            }
+            
+            function startPiAnimation() {
+                // Stop any existing animation
+                stopPiAnimation();
+                
+                const piDigits = document.querySelectorAll('.pi-digit');
+                let currentIndex = 0;
+                
+                // Animate digits sequentially
+                state.piAnimationInterval = setInterval(() => {
+                    // Reset previous digit
+                    if (currentIndex > 0) {
+                        piDigits[currentIndex - 1].style.color = '';
+                        piDigits[currentIndex - 1].style.textShadow = '';
+                    }
+                    
+                    // Highlight current digit
+                    if (currentIndex < piDigits.length) {
+                        piDigits[currentIndex].style.color = 'var(--accent)';
+                        piDigits[currentIndex].style.textShadow = 'var(--glow-accent)';
+                        piDigits[currentIndex].style.transform = 'scale(1.3)';
+                        
+                        // Reset transform after animation
+                        setTimeout(() => {
+                            piDigits[currentIndex].style.transform = 'scale(1)';
+                        }, 200);
+                        
+                        currentIndex++;
+                    } else {
+                        // Restart from beginning
+                        piDigits[piDigits.length - 1].style.color = '';
+                        piDigits[piDigits.length - 1].style.textShadow = '';
+                        currentIndex = 0;
+                    }
+                }, 100);
+                
+                showFeedback("π digit animation started", "success");
+                speakText("Animating the digits of pi. Watch as they light up in sequence.");
+            }
+            
+            function stopPiAnimation() {
+                if (state.piAnimationInterval) {
+                    clearInterval(state.piAnimationInterval);
+                    state.piAnimationInterval = null;
+                    
+                    // Reset all digits
+                    document.querySelectorAll('.pi-digit').forEach(digit => {
+                        digit.style.color = '';
+                        digit.style.textShadow = '';
+                        digit.style.transform = '';
+                    });
+                    
+                    showFeedback("π animation stopped", "success");
+                }
+            }
+            
+            function initNotes() {
+                const formulas = document.querySelectorAll('.formula');
+                const nextNoteBtn = document.getElementById('nextNote');
+                const readAllFormulasBtn = document.getElementById('readAllFormulas');
+                
+                // Add click events to formulas
+                formulas.forEach(formula => {
+                    formula.addEventListener('click', function() {
+                        const formulaType = this.dataset.formula;
+                        let explanation = "";
+                        
+                        switch(formulaType) {
+                            case 'partition':
+                                explanation = "This is the Hardy-Ramanujan formula for the partition function, which counts the number of ways to write a number as a sum of positive integers.";
+                                break;
+                            case 'pi':
+                                explanation = "This is one of Ramanujan's series for 1 over pi. It converges extraordinarily fast, adding about 8 decimal digits per term.";
+                                break;
+                            case 'mocktheta':
+                                explanation = "This is a mock theta function, part of Ramanujan's final letter to Hardy. These functions have deep connections to modular forms.";
+                                break;
+                            case 'taxicab':
+                                explanation = "This is the famous taxicab equation. 1729 is the smallest number that can be expressed as the sum of two cubes in two different ways.";
+                                break;
+                        }
+                        
+                        showFeedback(explanation, "success");
+                        speakText(explanation);
+                        addPoints(5, `Exploring ${formulaType} formula`);
+                        
+                        // Easter egg for clicking partition formula
+                        if (formulaType === 'partition' && !state.easterEggsShown.includes('partitionFormula')) {
+                            showEasterEgg("Ramanujan discovered the partition function asymptotic formula with G.H. Hardy while at Cambridge.", 4000);
+                            state.easterEggsShown.push('partitionFormula');
+                        }
+                    });
+                });
+                
+                // Next page button
+                nextNoteBtn.addEventListener('click', () => {
+                    state.currentNotePage++;
+                    if (state.currentNotePage > 3) state.currentNotePage = 1;
+                    
+                    const notePage = document.getElementById('notePage');
+                    
+                    // Simple page transition
+                    notePage.style.opacity = '0';
+                    setTimeout(() => {
+                        // Update content based on page
+                        let content = '';
+                        if (state.currentNotePage === 1) {
+                            content = `
+                                <h3 style="color: #333; margin-bottom: 20px; text-align: center;">Ramanujan's Notebooks</h3>
+                                
+                                <div class="formula" data-formula="partition">
+                                    p(n) = (1/(π√2))∑_{k=1}^∞ A_k(n)√k d/dn[sinh(π√(2/3)(√(n-1/24))/k)/(√(n-1/24))]
+                                </div>
+                                
+                                <p>This is the Hardy-Ramanujan asymptotic formula for the partition function p(n).</p>
+                                
+                                <div class="formula" data-formula="pi">
+                                    1/π = (2√2)/(99^2) ∑_{k=0}^∞ (26390k+1103)/(396^{4k}) (4k)!/(k!)^4
+                                </div>
+                                
+                                <p>One of Ramanujan's series for 1/π that converges remarkably quickly.</p>
+                            `;
+                        } else if (state.currentNotePage === 2) {
+                            content = `
+                                <h3 style="color: #333; margin-bottom: 20px; text-align: center;">Modular Forms & Mock Theta</h3>
+                                
+                                <div class="formula" data-formula="mocktheta">
+                                    f(q) = 1 + q/(1+q) + q^4/((1+q)(1+q^2)) + q^9/((1+q)(1+q^2)(1+q^3)) + ...
+                                </div>
+                                
+                                <p>A mock theta function, one of Ramanujan's last discoveries before his death.</p>
+                                
+                                <p style="margin-top: 20px;">Ramanujan's work on mock theta functions was so advanced that mathematicians are still exploring their implications today. These functions bridge number theory and complex analysis in profound ways.</p>
+                            `;
+                        } else {
+                            content = `
+                                <h3 style="color: #333; margin-bottom: 20px; text-align: center;">The Taxicab Number</h3>
+                                
+                                <div class="formula" data-formula="taxicab">
+                                    1729 = 1^3 + 12^3 = 9^3 + 10^3
+                                </div>
+                                
+                                <p>The famous taxicab number from the conversation with G.H. Hardy.</p>
+                                
+                                <p style="margin-top: 20px;">The story goes that when Hardy visited Ramanujan in the hospital, he mentioned that the taxi he came in had the "rather dull number" 1729. Ramanujan immediately replied that 1729 was actually very interesting as it's the smallest number expressible as the sum of two cubes in two different ways.</p>
+                                
+                                <p style="margin-top: 20px;">Numbers with this property are now called "taxicab numbers".</p>
+                            `;
+                        }
+                        
+                        notePage.innerHTML = content + `
+                            <div style="margin-top: 30px; text-align: center;">
+                                <button id="nextNote" class="control-btn">
+                                    <i class="fas fa-arrow-right"></i> Next Page
+                                </button>
+                                <button id="readAllFormulas" class="control-btn">
+                                    <i class="fas fa-volume-up"></i> Read All Formulas
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Reinitialize event listeners for new formulas
+                        initNotes();
+                        
+                        notePage.style.opacity = '1';
+                    }, 300);
+                    
+                    showFeedback(`Page ${state.currentNotePage} of 3`, "success");
+                });
+                
+                // Read all formulas button
+                readAllFormulasBtn.addEventListener('click', () => {
+                    speakText("Ramanujan's formulas represent groundbreaking discoveries in number theory, partition functions, infinite series, and modular forms. His work continues to influence mathematics to this day.");
+                    addPoints(10, "Listening to all formulas");
+                });
+            }
+            
+            function initEasterEggs() {
+                // Easter egg for clicking on title
+                const title = document.querySelector('h1');
+                title.addEventListener('click', () => {
+                    if (!state.easterEggsShown.includes('title')) {
+                        showEasterEgg("Srinivasa Ramanujan was an Indian mathematician who made extraordinary contributions to mathematical analysis, number theory, infinite series, and continued fractions.", 5000);
+                        state.easterEggsShown.push('title');
+                        addPoints(10, "Discovering Ramanujan fact");
+                    }
+                });
+                
+                // Easter egg for clicking on scoreboard
+                scoreboard.addEventListener('dblclick', () => {
+                    if (!state.easterEggsShown.includes('scoreboard')) {
+                        showEasterEgg("Ramanujan had almost no formal training in pure mathematics but made substantial contributions to mathematical research.", 5000);
+                        state.easterEggsShown.push('scoreboard');
+                        addPoints(10, "Discovering Ramanujan fact");
+                    }
+                });
+            }
+            
+            function showEasterEgg(message, duration = 3000) {
+                // Create easter egg element
+                const easterEgg = document.createElement('div');
+                easterEgg.className = 'easter-egg';
+                easterEgg.textContent = message;
+                easterEgg.style.top = `${50 + Math.random() * 30}%`;
+                easterEgg.style.left = `${10 + Math.random() * 80}%`;
+                
+                easterEggContainer.appendChild(easterEgg);
+                
+                // Show with animation
+                setTimeout(() => {
+                    easterEgg.style.display = 'block';
+                }, 10);
+                
+                // Speak the message
+                speakText(message);
+                
+                // Remove after duration
+                setTimeout(() => {
+                    easterEgg.style.opacity = '0';
+                    easterEgg.style.transform = 'scale(0.8)';
+                    
+                    setTimeout(() => {
+                        easterEgg.remove();
+                    }, 500);
+                }, duration);
+            }
+            
+            function createConfetti() {
+                // Create confetti particles
+                const confettiCount = 100;
+                const colors = ['#00ffff', '#ff00ff', '#ffff00', '#00ff88'];
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'fixed';
+                    confetti.style.width = '10px';
+                    confetti.style.height = '10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.left = `${Math.random() * 100}vw`;
+                    confetti.style.top = '-20px';
+                    confetti.style.zIndex = '9999';
+                    confetti.style.opacity = '0.8';
+                    confetti.style.pointerEvents = 'none';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Animate confetti falling
+                    const animation = confetti.animate([
+                        { transform: `translateY(0) rotate(0deg)`, opacity: 0.8 },
+                        { transform: `translateY(${window.innerHeight + 20}px) rotate(${360 + Math.random() * 360}deg)`, opacity: 0 }
+                    ], {
+                        duration: 2000 + Math.random() * 2000,
+                        easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
+                    });
+                    
+                    // Remove confetti after animation
+                    animation.onfinish = () => {
+                        confetti.remove();
+                    };
+                }
+            }
+            
+            // Initialize with welcome message
+            setTimeout(() => {
+                showFeedback("Welcome to Ramanujan AR Wall! Click on any card to begin exploring.", "success");
+                speakText("Welcome to the Ramanujan Augmented Reality Wall. Explore the mathematical genius of Srinivasa Ramanujan through interactive exhibits.");
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
